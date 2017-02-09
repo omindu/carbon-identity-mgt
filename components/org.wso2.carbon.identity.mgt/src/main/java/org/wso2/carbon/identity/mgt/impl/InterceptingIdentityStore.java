@@ -79,8 +79,6 @@ public class InterceptingIdentityStore implements IdentityStore {
         this.identityStore = identityStore;
     }
 
-
-
     public User getUser1(String uniqueUserId) throws IdentityStoreException, UserNotFoundException {
 
         //Pre handler
@@ -155,24 +153,20 @@ public class InterceptingIdentityStore implements IdentityStore {
 
         IdentityMgtMessageContext messageContext = new IdentityMgtMessageContext(null);
 
-        EventInterceptorTemplate<User, IdentityStoreException> template = new EventInterceptorTemplate<>(eventService, messageContext);
-        User user = template
-                .pushEvent(IdentityStoreInterceptorConstants.PRE_GET_USER_BY_ID,
-                        (eventProperties) -> {
-                            eventProperties.put(IdentityStoreConstants.UNIQUE_USED_ID, uniqueUserId);
-                        })
-                .executeWith(new EventHandlerDelegate<User>() {
-                    @Override
-                    public User execute() throws IdentityStoreException, UserNotFoundException{
-                        return identityStore.getUser(uniqueUserId);
-                    }
-                })
-                .pushEvent(IdentityStoreInterceptorConstants.POST_GET_USER_BY_ID,
-                        (eventProperties) -> {
-                            eventProperties.put(IdentityStoreConstants.UNIQUE_USED_ID, uniqueUserId);
-                            eventProperties.put(IdentityStoreConstants.USER, template.getResult());
-                        })
-                .getResult();
+        EventInterceptorTemplate<User, IdentityStoreException> template = new EventInterceptorTemplate<>(eventService,
+                messageContext);
+        User user = template.pushEvent(IdentityStoreInterceptorConstants.PRE_GET_USER_BY_ID, (eventProperties) -> {
+            eventProperties.put(IdentityStoreConstants.UNIQUE_USED_ID, uniqueUserId);
+        }).executeWith(new EventHandlerDelegate<User>() {
+
+            @Override
+            public User execute() throws IdentityStoreException, UserNotFoundException {
+                return identityStore.getUser(uniqueUserId);
+            }
+        }).pushEvent(IdentityStoreInterceptorConstants.POST_GET_USER_BY_ID, (eventProperties) -> {
+            eventProperties.put(IdentityStoreConstants.UNIQUE_USED_ID, uniqueUserId);
+            eventProperties.put(IdentityStoreConstants.USER, template.getResult());
+        }).getResult();
 
         return user;
     }

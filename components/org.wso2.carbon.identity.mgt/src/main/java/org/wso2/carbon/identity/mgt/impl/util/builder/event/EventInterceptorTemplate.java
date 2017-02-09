@@ -36,6 +36,7 @@ import java.util.Map;
  * This template purpose is to reduce the number of lines in the intercepting identity stores.
  *
  * @param <T> The type to be returned from the intercepted method.
+ * @param <X> Generic exception thrown. If any.
  */
 public class EventInterceptorTemplate<T extends Object, X extends Exception> {
 
@@ -72,8 +73,7 @@ public class EventInterceptorTemplate<T extends Object, X extends Exception> {
      * @return
      * @throws IdentityStoreException
      */
-    public EventInterceptorTemplate<T, X> executeWith(EventHandlerDelegate<T> delegate)
-            throws X {
+    public EventInterceptorTemplate<T, X> executeWith(EventHandlerDelegate<T> delegate) throws X {
 
         ResultReturningHandler<T, X> resultReturningHandler = new ResultReturningHandler<T, X>() {
 
